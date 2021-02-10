@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   testRunnerConfigPathList:
   - type: 0
-    path: Assets/Tests/Config/Utility/ObjectPoolTestRunnerConfig.asset
+    path: Assets/Tests/Config/Utility/ObjectPool/ObjectPoolTestRunnerConfig.asset
