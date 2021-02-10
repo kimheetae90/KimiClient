@@ -70,6 +70,9 @@ namespace KimiClient
                     return;
                 }
 
+                if (OnReturn != null)
+                    OnReturn(inReturnObject);
+
                 unUsePool.Push(inReturnObject);
             }
 
@@ -100,7 +103,7 @@ namespace KimiClient
                 }
             }
 
-            public void Refresh()
+            public void ReturnAll()
             {
                 foreach (var node in objectPool)
                 {
@@ -113,6 +116,8 @@ namespace KimiClient
 
             public void Clear()
             {
+                prefab = null;
+
                 OnInitailize = null;
                 OnGet = null;
                 OnReturn = null;

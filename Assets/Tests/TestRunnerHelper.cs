@@ -6,6 +6,7 @@ using UnityEditor;
 public static class TestRunnerHelper
 {
     public static bool testBoolean = false;
+    public static int testInt = 0;
     public static string testString;
     public static GameObject testGameObject = null;
 
