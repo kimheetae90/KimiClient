@@ -1,28 +1,35 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 namespace KimiClient
 {
     namespace Utility
     {
-        public class ObjectPool<KeyType, Template> where Template : new()
+        public class ObjectPool
         {
-            protected Dictionary<KeyType, Template> usePool;
-            protected Queue<Template> unUsePool;
+            protected List<GameObject> objectPool;
+            protected Stack<GameObject> unUsePool;
 
-            public int Count { get { return usePool.Count + unUsePool.Count; } }
-            public int ActiveCount { get { return usePool.Count; } }
+            public int Count { get { return objectPool.Count; } }
+            public int ActiveCount { get { return objectPool.Count - unUsePool.Count; } }
             public int DeactiveCount { get { return unUsePool.Count; } }
 
-            protected virtual void PreProcessInitiallize() { }
-            protected virtual void PostProcessGet(Template getObject) { }
+            public Action OnInitailize;
+            public Action<GameObject> OnGet;
+            public Action<GameObject> OnReturn;
+            public Action<GameObject> OnCreate;
 
-            public void Initiallize(int initSize = 0)
+            private GameObject prefab;
+
+            public void Initialize(GameObject inPrefab, int initSize = 0)
             {
-                usePool = new Dictionary<KeyType, Template>();
-                unUsePool = new Queue<Template>();
+                objectPool = new List<GameObject>();
+                unUsePool = new Stack<GameObject>();
+                prefab = inPrefab;
 
-                PreProcessInitiallize();
+                if (OnInitailize != null)
+                    OnInitailize();
 
                 for (int i = 0; i < initSize; i++)
                 {
@@ -30,82 +37,54 @@ namespace KimiClient
                 }
             }
 
-            public Template Get(KeyType key)
+            public GameObject Get()
             {
                 if (unUsePool.Count == 0)
                 {
                     CreateNewObject();
                 }
 
-                Template getObject = unUsePool.Dequeue();
-                PostProcessGet(getObject);
-                usePool.Add(key, getObject);
+                GameObject getObject = unUsePool.Pop();
+                if (OnGet != null)
+                    OnGet(getObject);
 
                 return getObject;
             }
 
             protected virtual void CreateNewObject()
             {
-                Template newObject = new Template();
-                unUsePool.Enqueue(newObject);
+                GameObject newGameObject = GameObject.Instantiate(prefab);
+                newGameObject.SetActive(false);
+                objectPool.Add(newGameObject);
+                unUsePool.Push(newGameObject);
+
+                if (OnCreate != null)
+                    OnCreate(newGameObject);
             }
 
-            public void Return(KeyType key)
+            public void Return(GameObject inReturnObject)
             {
-                if (!usePool.ContainsKey(key))
+                if (!objectPool.Contains(inReturnObject))
                 {
                     Debug.LogError("Pool doesn't contain New Object!");
                     return;
                 }
 
-                PreProcessReturn(usePool[key]);
-
-                unUsePool.Enqueue(usePool[key]);
-                usePool.Remove(key);
+                unUsePool.Push(inReturnObject);
             }
 
-            public void Return(Template value)
+            public void Each(Action<GameObject> func)
             {
-                if (!usePool.ContainsValue(value))
+                foreach (var node in objectPool)
                 {
-                    Debug.LogError("Pool doesn't contain New Object!");
-                    return;
-                }
-
-                foreach (var node in usePool)
-                {
-                    if (node.Value.Equals(value))
+                    if(!unUsePool.Contains(node))
                     {
-                        PreProcessReturn(value);
-
-                        unUsePool.Enqueue(value);
-                        usePool.Remove(node.Key);
-                        break;
+                        func(node);
                     }
                 }
             }
 
-            protected virtual void PreProcessReturn(Template returnObject) { }
-
-            public Template Find(KeyType key)
-            {
-                if (usePool.ContainsKey(key))
-                {
-                    return usePool[key];
-                }
-
-                return default(Template);
-            }
-
-            public void Each(System.Action<Template> func)
-            {
-                foreach (var node in usePool)
-                {
-                    func(node.Value);
-                }
-            }
-
-            public void EachForUnUse(System.Action<Template> func)
+            public void EachForUnUse(Action<GameObject> func)
             {
                 foreach (var node in unUsePool)
                 {
@@ -113,31 +92,33 @@ namespace KimiClient
                 }
             }
 
-            public void EachForAll(System.Action<Template> func)
+            public void EachForAll(Action<GameObject> func)
             {
-                Each(func);
-                EachForUnUse(func);
+                foreach (var node in objectPool)
+                {
+                    func(node);
+                }
             }
 
-            public void Refresh(System.Action<Template> func = null)
+            public void Refresh()
             {
-                int poolSize = usePool.Count;
-                foreach (var node in usePool)
+                foreach (var node in objectPool)
                 {
-                    unUsePool.Enqueue(node.Value);
+                    if(!unUsePool.Contains(node))
+                    {
+                        Return(node);
+                    }
                 }
-
-                if (func != null)
-                {
-                    EachForUnUse(func);
-                }
-
-                usePool.Clear();
             }
 
-            public virtual void Clear()
+            public void Clear()
             {
-                usePool.Clear();
+                OnInitailize = null;
+                OnGet = null;
+                OnReturn = null;
+                OnCreate = null;
+
+                objectPool.Clear();
                 unUsePool.Clear();
 
             }
