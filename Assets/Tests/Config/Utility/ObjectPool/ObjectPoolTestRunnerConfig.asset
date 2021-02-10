@@ -9,9 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54b182bc67e5fac41a0200e2b6495e71, type: 3}
-  m_Name: TestRunnerConfigPathInfo
+  m_Script: {fileID: 11500000, guid: d129de73a4e98804498ae43eb4639674, type: 3}
+  m_Name: ObjectPoolTestRunnerConfig
   m_EditorClassIdentifier: 
-  testRunnerConfigPathList:
-  - type: 0
-    path: Assets/Tests/Config/Utility/ObjectPool/ObjectPoolTestRunnerConfig.asset
+  Type: 0
+  initialize_count: 3
+  initialize_prefab: {fileID: 4468633378514270229, guid: 36b7bf54e644d1e41b198a375e010bdd,
+    type: 3}
