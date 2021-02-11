@@ -6,27 +6,24 @@ namespace KimiClient
 {
     namespace Utility
     {
-        public class ObjectPool
+        public class ObjectPool<Template> where Template : new()
         {
-            protected List<GameObject> objectPool;
-            protected Stack<GameObject> unUsePool;
+            protected List<Template> objectPool;
+            protected Stack<Template> unUsePool;
 
             public int Count { get { return objectPool.Count; } }
             public int ActiveCount { get { return objectPool.Count - unUsePool.Count; } }
             public int DeactiveCount { get { return unUsePool.Count; } }
 
             public Action OnInitailize;
-            public Action<GameObject> OnGet;
-            public Action<GameObject> OnReturn;
-            public Action<GameObject> OnCreate;
+            public Action<Template> OnGet;
+            public Action<Template> OnReturn;
+            public Action<Template> OnCreate;
 
-            private GameObject prefab;
-
-            public void Initialize(GameObject inPrefab, int initSize = 0)
+            public virtual void Initialize(int initSize = 0)
             {
-                objectPool = new List<GameObject>();
-                unUsePool = new Stack<GameObject>();
-                prefab = inPrefab;
+                objectPool = new List<Template>();
+                unUsePool = new Stack<Template>();
 
                 if (OnInitailize != null)
                     OnInitailize();
@@ -37,14 +34,14 @@ namespace KimiClient
                 }
             }
 
-            public GameObject Get()
+            public Template Get()
             {
                 if (unUsePool.Count == 0)
                 {
                     CreateNewObject();
                 }
 
-                GameObject getObject = unUsePool.Pop();
+                Template getObject = unUsePool.Pop();
                 if (OnGet != null)
                     OnGet(getObject);
 
@@ -53,8 +50,7 @@ namespace KimiClient
 
             protected virtual void CreateNewObject()
             {
-                GameObject newGameObject = GameObject.Instantiate(prefab);
-                newGameObject.SetActive(false);
+                Template newGameObject = new Template();
                 objectPool.Add(newGameObject);
                 unUsePool.Push(newGameObject);
 
@@ -62,7 +58,7 @@ namespace KimiClient
                     OnCreate(newGameObject);
             }
 
-            public void Return(GameObject inReturnObject)
+            public void Return(Template inReturnObject)
             {
                 if (!objectPool.Contains(inReturnObject))
                 {
@@ -76,18 +72,18 @@ namespace KimiClient
                 unUsePool.Push(inReturnObject);
             }
 
-            public void Each(Action<GameObject> func)
+            public void Each(Action<Template> func)
             {
                 foreach (var node in objectPool)
                 {
-                    if(!unUsePool.Contains(node))
+                    if (!unUsePool.Contains(node))
                     {
                         func(node);
                     }
                 }
             }
 
-            public void EachForUnUse(Action<GameObject> func)
+            public void EachForUnUse(Action<Template> func)
             {
                 foreach (var node in unUsePool)
                 {
@@ -95,7 +91,7 @@ namespace KimiClient
                 }
             }
 
-            public void EachForAll(Action<GameObject> func)
+            public void EachForAll(Action<Template> func)
             {
                 foreach (var node in objectPool)
                 {
@@ -107,17 +103,15 @@ namespace KimiClient
             {
                 foreach (var node in objectPool)
                 {
-                    if(!unUsePool.Contains(node))
+                    if (!unUsePool.Contains(node))
                     {
                         Return(node);
                     }
                 }
             }
 
-            public void Clear()
+            public virtual void Clear()
             {
-                prefab = null;
-
                 OnInitailize = null;
                 OnGet = null;
                 OnReturn = null;
