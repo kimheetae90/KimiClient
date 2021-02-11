@@ -6,9 +6,9 @@ namespace KimiClient
 {
     namespace Utility
     {
-        public interface IEventSubscriber<GameEventType>
+        public interface IEventSubscriber
         {
-            void Receive(GameEvent<GameEventType> inEvent);
+            void Receive(GameEvent inEvent);
         }
     }
 }
