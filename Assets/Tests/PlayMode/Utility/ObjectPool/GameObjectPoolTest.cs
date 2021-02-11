@@ -8,9 +8,9 @@ using KimiClient.Utility;
 
 namespace Tests
 {
-    public class ObjectPoolTest
+    public class GameObjectPoolTest
     {
-        ObjectPool objectPool;
+        GameObjectPool objectPool;
         ObjectPoolTestRunnerConfig config;
 
         [UnityTest]
@@ -58,16 +58,16 @@ namespace Tests
 
             Action<GameObject> onCreate = (x) => 
             {
-                x.AddComponent<TestRunnerObject>(); 
+                x.AddComponent<TestRunnerGameObject>(); 
             };
             Action<GameObject> onGet = (x) => 
-            { 
-                TestRunnerObject tro = x.GetComponent<TestRunnerObject>();
+            {
+                TestRunnerGameObject tro = x.GetComponent<TestRunnerGameObject>();
                 tro.TestInt = 30;
             };
             Action<GameObject> onReturn = (x) => 
             {
-                TestRunnerObject tro = x.GetComponent<TestRunnerObject>();
+                TestRunnerGameObject tro = x.GetComponent<TestRunnerGameObject>();
                 tro.TestInt = -30;
             };
 
@@ -78,7 +78,7 @@ namespace Tests
             objectPool.Initialize(config.initialize_prefab, config.initialize_count);
 
             GameObject poolObject = objectPool.Get();
-            TestRunnerObject testRunnerObject = poolObject.GetComponent<TestRunnerObject>();
+            TestRunnerGameObject testRunnerObject = poolObject.GetComponent<TestRunnerGameObject>();
             Assert.IsTrue(testRunnerObject != null);
             Assert.AreEqual(testRunnerObject.TestInt, 30);
 
@@ -126,7 +126,7 @@ namespace Tests
 
             Action<GameObject> onCreate = (x) =>
             {
-                TestRunnerObject tro = x.AddComponent<TestRunnerObject>();
+                TestRunnerGameObject tro = x.AddComponent<TestRunnerGameObject>();
                 tro.TestInt = 10;
             };
 
@@ -138,7 +138,7 @@ namespace Tests
             TestRunnerHelper.testInt = 0;
             objectPool.Each(x =>
             {
-                TestRunnerObject tro = x.GetComponent<TestRunnerObject>();
+                TestRunnerGameObject tro = x.GetComponent<TestRunnerGameObject>();
                 TestRunnerHelper.testInt += tro.TestInt;
             });
             Assert.AreEqual(TestRunnerHelper.testInt, 10);
@@ -146,7 +146,7 @@ namespace Tests
             TestRunnerHelper.testInt = 0;
             objectPool.EachForUnUse(x =>
             {
-                TestRunnerObject tro = x.GetComponent<TestRunnerObject>();
+                TestRunnerGameObject tro = x.GetComponent<TestRunnerGameObject>();
                 TestRunnerHelper.testInt += tro.TestInt;
             });
             Assert.AreEqual(TestRunnerHelper.testInt, 20);
@@ -154,7 +154,7 @@ namespace Tests
             TestRunnerHelper.testInt = 0;
             objectPool.EachForAll(x =>
             {
-                TestRunnerObject tro = x.GetComponent<TestRunnerObject>();
+                TestRunnerGameObject tro = x.GetComponent<TestRunnerGameObject>();
                 TestRunnerHelper.testInt += tro.TestInt;
             });
             Assert.AreEqual(TestRunnerHelper.testInt, 30);
@@ -164,7 +164,7 @@ namespace Tests
         public void InitailizeObjectPool()
         {
             config = TestRunnerHelper.GetTestRunnerConfig(ETestRunnerConfigType.ObjectPool) as ObjectPoolTestRunnerConfig;
-            objectPool = new ObjectPool();
+            objectPool = new GameObjectPool();
         }
     }
 }
