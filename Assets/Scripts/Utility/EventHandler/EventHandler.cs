@@ -6,19 +6,19 @@ namespace KimiClient
 {
     namespace Utility
     {
-        public class EventHandler<GameEventType>
+        public class EventHandler
         {
             public static int GAMEEVENT_DEFAULT_POOLSIZE = 20;
 
             public int QueueCount { get { return gameEventQueue.Count; } }
 
-            private Queue<GameEvent<GameEventType>> gameEventQueue;
-            private Dictionary<GameEventType, List<IEventSubscriber<GameEventType>>> subscriberDic;
+            private Queue<GameEvent> gameEventQueue;
+            private Dictionary<int, List<IEventSubscriber>> subscriberDic;
             
             public EventHandler()
             {
-                gameEventQueue = new Queue<GameEvent<GameEventType>>();
-                subscriberDic = new Dictionary<GameEventType, List<IEventSubscriber<GameEventType>>>();
+                gameEventQueue = new Queue<GameEvent>();
+                subscriberDic = new Dictionary<int, List<IEventSubscriber>>();
             }
 
             ~EventHandler()
@@ -27,7 +27,7 @@ namespace KimiClient
                 subscriberDic = null;
             }
 
-            public void Publish(GameEvent<GameEventType> inEvent)
+            public void Publish(GameEvent inEvent)
             {
                 gameEventQueue.Enqueue(inEvent);
             }
@@ -43,22 +43,22 @@ namespace KimiClient
 
             public void FireEvent()
             {
-                GameEvent<GameEventType> eventData = gameEventQueue.Dequeue();
-                List<IEventSubscriber<GameEventType>> subscriberList;
-                if (subscriberDic.TryGetValue(eventData.Type, out subscriberList))
+                GameEvent eventData = gameEventQueue.Dequeue();
+                List<IEventSubscriber> subscriberList;
+                if (subscriberDic.TryGetValue(eventData.EventID, out subscriberList))
                 {
                     subscriberList.ForEach(x => x.Receive(eventData));
                 }
             }
 
-            public bool Subscribe(GameEventType inType, IEventSubscriber<GameEventType> inSubscriber)
+            public bool Subscribe(int inID, IEventSubscriber inSubscriber)
             {
-                List<IEventSubscriber<GameEventType>> subscriberList;
-                if(subscriberDic.TryGetValue(inType, out subscriberList))
+                List<IEventSubscriber> subscriberList;
+                if(subscriberDic.TryGetValue(inID, out subscriberList))
                 {
                     if(subscriberList.Contains(inSubscriber))
                     {
-                        Debug.LogError("EventHandler already contains subscriber! : " + inType + "[" + inSubscriber + "]");
+                        Debug.LogError("EventHandler already contains subscriber! : " + inID + "[" + inSubscriber + "]");
                         return false;
                     }
 
@@ -66,33 +66,33 @@ namespace KimiClient
                 }
                 else
                 {
-                    subscriberList = new List<IEventSubscriber<GameEventType>>();
+                    subscriberList = new List<IEventSubscriber>();
                     subscriberList.Add(inSubscriber);
-                    subscriberDic.Add(inType, subscriberList);
+                    subscriberDic.Add(inID, subscriberList);
                 }
 
                 return true;
             }
 
-            public bool UnSubscribe(GameEventType inType, IEventSubscriber<GameEventType> inSubscriber)
+            public bool UnSubscribe(int inID, IEventSubscriber inSubscriber)
             {
-                List<IEventSubscriber<GameEventType>> subscriberList;
-                if (subscriberDic.TryGetValue(inType, out subscriberList))
+                List<IEventSubscriber> subscriberList;
+                if (subscriberDic.TryGetValue(inID, out subscriberList))
                 {
                     if (!subscriberList.Contains(inSubscriber))
                     {
-                        Debug.LogError("EventHandler not contains subscriber! : " + inType + "[" + inSubscriber + "]");
+                        Debug.LogError("EventHandler not contains subscriber! : " + inID + "[" + inSubscriber + "]");
                         return false;
                     }
 
                     subscriberList.Remove(inSubscriber);
 
                     if (subscriberList.Count == 0)
-                        subscriberDic.Remove(inType);
+                        subscriberDic.Remove(inID);
                 }
                 else
                 {
-                    Debug.LogError("EventHandler not contains subscriber! : " + inType + "[" + inSubscriber + "]");
+                    Debug.LogError("EventHandler not contains subscriber! : " + inID + "[" + inSubscriber + "]");
                     return false;
                 }
 

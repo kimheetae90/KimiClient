@@ -6,9 +6,9 @@ namespace KimiClient
 {
     namespace Utility
     {
-        public class GameEvent<GameEventType>
+        public class GameEvent
         {
-            public GameEventType Type;
+            public int EventID;
         }
     }
 }
