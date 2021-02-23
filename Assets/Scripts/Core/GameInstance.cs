@@ -48,7 +48,7 @@ namespace KimiClient
                 return true;
             }
 
-            public void PublishGameEvent<GameEventType>(GameEvent<GameEventType> inGameEvent)
+            public void PublishGameEvent(GameEvent inGameEvent)
             {
             }
         }

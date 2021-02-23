@@ -22,7 +22,7 @@ namespace KimiClient
                 GameInstance.Instance.UnRegistManager(this);
             }
 
-            public void ReceiveGameEvent<GameEventType>(GameEvent<GameEventType> inGameEvent)
+            public void ReceiveGameEvent<GameEventType>(GameEvent inGameEvent)
             {
 
             }
