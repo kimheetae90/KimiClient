@@ -29,7 +29,7 @@ namespace Tests
             }
         }
 
-        public class EventHandlerSubscriber1 : IEventSubscriber
+        public class EventHandlerSubscriber1 : IGameEventSubscriber
         {
             public int testInt;
 
@@ -43,7 +43,7 @@ namespace Tests
             }
         }
 
-        public class EventHandlerSubscriber2 : IEventSubscriber
+        public class EventHandlerSubscriber2 : IGameEventSubscriber
         {
             public float testFloat;
 
@@ -57,7 +57,7 @@ namespace Tests
             }
         }
 
-        public class EventHandlerSubscriber3 : IEventSubscriber
+        public class EventHandlerSubscriber3 : IGameEventSubscriber
         {
             public int testInt;
             public float testFloat;
@@ -80,7 +80,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator EventHandlerTestWithEnumeratorPasses()
         {
-            EventHandler eventHandler = new EventHandler();
+            GameEventHandler eventHandler = new GameEventHandler();
 
             EventHandlerSubscriber1 subscriber1 = new EventHandlerSubscriber1();
             EventHandlerSubscriber2 subscriber2 = new EventHandlerSubscriber2();

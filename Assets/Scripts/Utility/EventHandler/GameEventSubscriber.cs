@@ -6,9 +6,16 @@ namespace KimiClient
 {
     namespace Utility
     {
-        public interface IEventSubscriber
+        public interface IGameEventSubscriber
         {
             void Receive(GameEvent inEvent);
+        }
+
+        public interface IGameEventPublisher
+        {
+            void FireEvent(GameEvent inEvent);
+            bool Subscribe(int inID, IGameEventSubscriber inSubscriber);
+            bool UnSubscribe(int inID, IGameEventSubscriber inSubscriber);
         }
     }
 }
