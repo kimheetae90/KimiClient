@@ -19,7 +19,35 @@ namespace KimiClient
 
             ~GameEventRouter()
             {
+                Clear();
                 subscriberDic = null;
+            }
+
+            public void Clear()
+            {
+                Dictionary<int, List<IGameEventSubscriber>> tempSubscriberDic = new Dictionary<int, List<IGameEventSubscriber>>();
+                foreach (var list in subscriberDic)
+                {
+                    foreach (var subscriber in list.Value)
+                    {
+                        if (!tempSubscriberDic.ContainsKey(list.Key))
+                        {
+                            tempSubscriberDic.Add(list.Key, new List<IGameEventSubscriber>());
+                        }
+
+                        tempSubscriberDic[list.Key].Add(subscriber);
+                    }
+                }
+
+                foreach (var list in tempSubscriberDic)
+                {
+                    foreach (var subscriber in list.Value)
+                    {
+                        UnSubscribe(list.Key, subscriber);
+                    }
+                }
+
+                tempSubscriberDic = null;
             }
 
             public void LinkPublisher(IGameEventPublisher inPublisher)
@@ -48,7 +76,9 @@ namespace KimiClient
                 {
                     subscriberList = new List<IGameEventSubscriber>();
                     subscriberDic.Add(inID, subscriberList);
-                    publisher.Subscribe(inID, this);
+
+                    if(publisher != null)
+                        publisher.Subscribe(inID, this);
                 }
 
                 subscriberList.Add(inSubscriber);
@@ -78,7 +108,8 @@ namespace KimiClient
                 if (subscriberList.Count == 0)
                 {
                     subscriberDic.Remove(inID);
-                    publisher.UnSubscribe(inID, this);
+                    if(publisher != null)
+                        publisher.UnSubscribe(inID, this);
                 }
 
                 return true;

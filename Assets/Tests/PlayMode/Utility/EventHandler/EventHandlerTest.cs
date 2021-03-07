@@ -77,19 +77,43 @@ namespace Tests
             }
         }
 
+
+        public class EventHandlerSubscriber4 : IGameEventSubscriber
+        {
+            public int testInt;
+            public float testFloat;
+
+            public void Receive(GameEvent inEvent)
+            {
+                if (inEvent.EventID == (int)ETestRunenrEnum.Test1)
+                {
+                    TestRunnerGameEvent1 event1 = inEvent as TestRunnerGameEvent1;
+                    testInt = event1.testInt;
+                }
+                else if (inEvent.EventID == (int)ETestRunenrEnum.Test2)
+                {
+                    TestRunnerGameEvent2 event2 = inEvent as TestRunnerGameEvent2;
+                    testFloat = event2.testFloat;
+                }
+            }
+        }
+
         [UnityTest]
         public IEnumerator EventHandlerTestWithEnumeratorPasses()
         {
             GameEventHandler eventHandler = new GameEventHandler();
+            GameEventRouter eventRouter = new GameEventRouter();            
 
             EventHandlerSubscriber1 subscriber1 = new EventHandlerSubscriber1();
             EventHandlerSubscriber2 subscriber2 = new EventHandlerSubscriber2();
             EventHandlerSubscriber3 subscriber3 = new EventHandlerSubscriber3();
 
-            eventHandler.Subscribe((int)ETestRunenrEnum.Test1 ,subscriber1);
-            eventHandler.Subscribe((int)ETestRunenrEnum.Test2, subscriber2);
-            eventHandler.Subscribe((int)ETestRunenrEnum.Test1, subscriber3);
-            eventHandler.Subscribe((int)ETestRunenrEnum.Test2, subscriber3);
+            eventRouter.LinkPublisher(eventHandler);
+
+            eventRouter.Subscribe((int)ETestRunenrEnum.Test1 ,subscriber1);
+            eventRouter.Subscribe((int)ETestRunenrEnum.Test2, subscriber2);
+            eventRouter.Subscribe((int)ETestRunenrEnum.Test1, subscriber3);
+            eventRouter.Subscribe((int)ETestRunenrEnum.Test2, subscriber3);
 
             int testInt = 3;
             TestRunnerGameEvent1 event1 = new TestRunnerGameEvent1();
@@ -108,8 +132,8 @@ namespace Tests
             Assert.AreEqual(testInt, subscriber3.testInt);
             Assert.AreEqual(testFloat, subscriber3.testFloat);
 
-            eventHandler.UnSubscribe((int)ETestRunenrEnum.Test1, subscriber1);
-            eventHandler.UnSubscribe((int)ETestRunenrEnum.Test2, subscriber3);
+            eventRouter.UnSubscribe((int)ETestRunenrEnum.Test1, subscriber1);
+            eventRouter.UnSubscribe((int)ETestRunenrEnum.Test2, subscriber3);
 
             int newTestInt = 999;
             float newTestFloat = 999.99f;
@@ -124,6 +148,16 @@ namespace Tests
             Assert.AreEqual(newTestFloat, subscriber2.testFloat);
             Assert.AreEqual(newTestInt, subscriber3.testInt);
             Assert.AreEqual(testFloat, subscriber3.testFloat);
+
+            eventRouter.Clear();
+            System.GC.Collect();
+
+            newTestFloat = -123.45f;
+            event2.testFloat = newTestFloat;
+            eventHandler.Publish(event2);
+            eventHandler.FireAllEvent();
+
+            Assert.AreNotEqual(newTestFloat, subscriber2.testFloat);
 
             yield return null;
         }
