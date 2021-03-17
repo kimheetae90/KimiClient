@@ -4,11 +4,9 @@ using UnityEngine;
 
 namespace KimiClient
 {
-    namespace Core
+    namespace View
     {
-        using Utility;
-
-        public class GameInstance : MonoBehaviour
+        public class EffectView : MonoBehaviour
         {
         }
     }
