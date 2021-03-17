@@ -7,5 +7,6 @@ public enum ETestRunenrEnum
     None,
     Test1,
     Test2,
+    Test3,
     Max
 }
